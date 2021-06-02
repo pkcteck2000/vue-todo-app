@@ -32,19 +32,20 @@
       </template>
 
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
-      <v-app-bar-title>Todo App</v-app-bar-title>
+      <div class="input-box">
+        <v-text-field
+          outlined
+          label="Enter task"
+          append-icon="mdi-plus"
+          class="ma-3 text-box"
+          hide-details
+          clearable
+        ></v-text-field>
+      </div>
       <v-spacer></v-spacer>
 
       <v-btn icon>
         <v-icon>mdi-magnify</v-icon>
-      </v-btn>
-
-      <v-btn icon>
-        <v-icon>mdi-heart</v-icon>
-      </v-btn>
-
-      <v-btn icon>
-        <v-icon>mdi-dots-vertical</v-icon>
       </v-btn>
     </v-app-bar>
 
@@ -56,14 +57,25 @@
 
 <script lang="ts">
 import { Vue, Component } from "vue-property-decorator";
+import { navigationoptions } from "@/constants/uiOptions";
 
 @Component
 export default class Home extends Vue {
   drawer = null;
-  items = [
-    { title: "Todo", icon: "mdi-format-list-checks", to: "/" },
-    { title: "About", icon: "mdi-information", to: "/about" },
-  ];
+  items = navigationoptions;
   right = null;
 }
 </script>
+
+<style lang="scss">
+.input-box {
+  position: fixed;
+  z-index: 5;
+  width: 100%;
+  top: 3rem;
+  left: 0;
+  .text-box {
+    background: rgba(54, 59, 73, 0.5);
+  }
+}
+</style>

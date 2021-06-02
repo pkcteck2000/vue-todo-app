@@ -25,15 +25,56 @@
               >{{ task.title }}</v-list-item-title
             >
           </v-list-item-content>
-          <v-list-item-action @click.stop="deleteTodo(task.id)">
-            <v-btn icon>
-              <v-icon color="red">mdi-delete</v-icon>
-            </v-btn>
-          </v-list-item-action>
+          <v-menu bottom left>
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn dark icon v-bind="attrs" v-on="on">
+                <v-icon color="primary">mdi-dots-vertical</v-icon>
+              </v-btn>
+            </template>
+
+            <v-list>
+              <template v-for="(item, i) in items">
+                <v-list-item
+                  :key="i"
+                  @click.stop="
+                    handleFunctionCall(item.methodName, task.id, task.title)
+                  "
+                  class="d-flex flex-row"
+                >
+                  <v-list-item-title>{{ item.title }}</v-list-item-title>
+                  <v-icon color="primary" class="pl-5">{{ item.icon }}</v-icon>
+                </v-list-item>
+              </template>
+            </v-list>
+          </v-menu>
         </v-list-item>
         <v-divider></v-divider>
       </div>
     </v-list>
+    <v-dialog v-model="dialog" max-width="490">
+      <v-card>
+        <v-card-title class="text-h5 pa-4"> Edit Task </v-card-title>
+
+        <v-text-field
+          v-model="editTaskTitle"
+          outlined
+          label="Enter task"
+          hide-details
+          clearable
+          class="pa-4"
+        ></v-text-field>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+
+          <v-btn color="green darken-1" text @click="dialog = false">
+            Cancel
+          </v-btn>
+
+          <v-btn color="green darken-1" text @click="editTodo"> Save </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -43,7 +84,20 @@ import { Vue, Component } from "vue-property-decorator";
 @Component
 export default class Home extends Vue {
   newTaskTitle = "";
-  tasks: { id: number; title: string; done: boolean }[] = [];
+  editTaskTitle = "";
+  id = -1;
+  tasks: { id: number; title: string; done: boolean }[] = [
+    { id: 1, title: "todo 1", done: false },
+    { id: 2, title: "todo 2", done: false },
+  ];
+
+  items = [
+    { title: "Delete", icon: "mdi-delete", methodName: "deleteTodo" },
+    { title: "Edit", icon: "mdi-pencil", methodName: "editTodo" },
+    // { title: "Click Me", icon: "", click: "" },
+  ];
+
+  dialog = false;
 
   addTask(): void {
     if (this.newTaskTitle) {
@@ -64,6 +118,30 @@ export default class Home extends Vue {
 
   deleteTodo(id: number): void {
     this.tasks = this.tasks.filter((task) => task.id !== id);
+  }
+
+  editTodo(): void {
+    this.dialog = false;
+    this.tasks.forEach((task) => {
+      if (task.id === this.id) {
+        task.title = this.editTaskTitle;
+      }
+    });
+    this.editTaskTitle = "";
+    this.id = -1;
+  }
+
+  handleFunctionCall(functionName: string, id: number, task: string): void {
+    switch (functionName) {
+      case "deleteTodo":
+        this.deleteTodo(id);
+        break;
+      case "editTodo":
+        this.dialog = true;
+        this.id = id;
+        this.editTaskTitle = task;
+        break;
+    }
   }
 }
 </script>

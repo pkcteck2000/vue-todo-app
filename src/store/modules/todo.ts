@@ -1,41 +1,43 @@
 import { VuexModule, Module, Mutation, Action } from "vuex-module-decorators";
 import { TodoActions, TodoMutations } from "@/utils/types";
+import { getTodoList, updateTodoList } from "@/utils/api";
 @Module({ namespaced: true })
 class Todo extends VuexModule {
-  todoData: any[] = [];
+  public todoData: any[] = [];
 
   @Mutation
-  public [TodoMutations.LOAD_TODOD_DATA](todoData: any[]): void {
-    this.todoData = todoData;
+  public async [TodoMutations.LOAD_TODOD_DATA](): Promise<void> {
+    getTodoList().then((response) => {
+      this.todoData = response.data || [];
+    });
   }
 
   @Action
   [TodoActions.LOAD_TODOD_DATA](): void {
-    this.context.commit(TodoMutations.LOAD_TODOD_DATA, [
-      { id: 1, title: "todo 1", dueTime: "", done: false },
-      { id: 2, title: "todo 2", dueTime: "", done: false },
-    ]);
+    this.context.commit(TodoMutations.LOAD_TODOD_DATA);
   }
 
   @Mutation
-  public [TodoMutations.ADD_TASK](newTaskTitle: any[]): void {
+  public [TodoMutations.ADD_TASK](newTaskTitle: { newTask: string }): void {
     const newTask = {
       id: Date.now(),
-      title: newTaskTitle,
+      title: newTaskTitle.newTask,
       dueTime: "",
       done: false,
     };
     this.todoData.push(newTask);
+    updateTodoList(this.todoData);
   }
 
   @Action
-  [TodoActions.ADD_TASK](newTask: string): void {
-    this.context.commit(TodoMutations.ADD_TASK, newTask);
+  public [TodoActions.ADD_TASK](newTask: string): void {
+    this.context.commit(TodoMutations.ADD_TASK, { newTask });
   }
 
   @Mutation
   public [TodoMutations.DELETE_TASK](id: number[]): void {
     this.todoData = this.todoData.filter((task) => task.id !== id);
+    updateTodoList(this.todoData);
   }
 
   @Action
@@ -53,6 +55,7 @@ class Todo extends VuexModule {
         task.title = updatedData.editTaskTitle;
       }
     });
+    updateTodoList(this.todoData);
   }
 
   @Action
@@ -67,6 +70,7 @@ class Todo extends VuexModule {
   public [TodoMutations.UPDATE_PROGRESS](id: number): void {
     const task = this.todoData.filter((task) => task.id === id)[0];
     task.done = !task.done;
+    updateTodoList(this.todoData);
   }
 
   @Action
@@ -77,6 +81,7 @@ class Todo extends VuexModule {
   @Mutation
   public [TodoMutations.REARRANGE](tasks: any): void {
     this.todoData = tasks;
+    updateTodoList(this.todoData);
   }
 
   @Action

@@ -87,37 +87,49 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from "vue-property-decorator";
+import { Vue, Component, Watch } from "vue-property-decorator";
+import { namespace } from "vuex-class";
 import draggable from "vuedraggable";
 import { menuOptions, headerOptions } from "@/constants/uiOptions";
+import { TodoActions } from "@/utils/types";
 
+const todo = namespace("Todo");
 @Component({
   components: {
     draggable,
   },
 })
 export default class Home extends Vue {
-  newTaskTitle = "";
   editTaskTitle = "";
   id = -1;
   rearrange = false;
   items = menuOptions;
   headerOptions = headerOptions;
-  tasks: { id: number; title: string; dueTime: string; done: boolean }[] = [
-    { id: 1, title: "todo 1", dueTime: "", done: false },
-    { id: 2, title: "todo 2", dueTime: "", done: false },
-    { id: 3, title: "todo 2", dueTime: "", done: false },
-    { id: 4, title: "todo 2", dueTime: "", done: false },
-    { id: 5, title: "todo 2", dueTime: "", done: false },
-    { id: 6, title: "todo 2", dueTime: "", done: false },
-    { id: 7, title: "todo 2", dueTime: "", done: false },
-    { id: 8, title: "todo 2", dueTime: "", done: false },
-    { id: 9, title: "todo 2", dueTime: "", done: false },
-    { id: 10, title: "todo 2", dueTime: "", done: false },
-    { id: 11, title: "todo 2", dueTime: "", done: false },
-    { id: 12, title: "todo 2", dueTime: "", done: false },
-  ];
   dialog = false;
+  tasks: any[] = [];
+
+  @todo.Getter("loadTodoData")
+  loadTodoData!: any[];
+
+  @todo.Action(TodoActions.DELETE_TASK)
+  public deleteTask!: (id: number) => void;
+
+  @todo.Action(TodoActions.EDIT_TASK)
+  public editTask!: (updatedData: {
+    id: number;
+    editTaskTitle: string;
+  }) => void;
+
+  @todo.Action(TodoActions.REARRANGE)
+  public rearrangeTask!: (task: any) => void;
+
+  @todo.Action(TodoActions.UPDATE_PROGRESS)
+  public updateTask!: (id: number) => void;
+
+  @Watch("loadTodoData")
+  setTaskList(): void {
+    this.tasks = this.loadTodoData;
+  }
 
   showOption(i: number): boolean {
     if (i === 0 && !this.rearrange) {
@@ -128,36 +140,18 @@ export default class Home extends Vue {
     return false;
   }
 
-  addTask(): void {
-    if (this.newTaskTitle) {
-      const newTask = {
-        id: Date.now(),
-        title: this.newTaskTitle,
-        dueTime: "",
-        done: false,
-      };
-      this.tasks.push(newTask);
-      this.newTaskTitle = "";
-    }
-  }
-
   doneTask(id: number): void {
-    let task = this.tasks.filter((task) => task.id === id)[0];
-    task.done = !task.done;
+    this.updateTask(id);
   }
 
   deleteTodo(id: number): void {
-    this.tasks = this.tasks.filter((task) => task.id !== id);
+    this.deleteTask(id);
   }
 
   editTodo(): void {
     if (this.editTaskTitle) {
+      this.editTask({ id: this.id, editTaskTitle: this.editTaskTitle });
       this.dialog = false;
-      this.tasks.forEach((task) => {
-        if (task.id === this.id) {
-          task.title = this.editTaskTitle;
-        }
-      });
       this.editTaskTitle = "";
       this.id = -1;
     }
@@ -165,6 +159,7 @@ export default class Home extends Vue {
 
   updateOrder(): void {
     this.rearrange = !this.rearrange;
+    this.rearrangeTask(this.tasks);
   }
 
   handleFunctionCall(functionName: string, id = -1, task = ""): void {
@@ -184,6 +179,10 @@ export default class Home extends Vue {
         this.updateOrder();
         break;
     }
+  }
+
+  created(): void {
+    this.tasks = this.loadTodoData;
   }
 }
 </script>
@@ -208,15 +207,3 @@ export default class Home extends Vue {
   }
 }
 </style>
-
-
-      <!-- <v-text-field
-        v-model="newTaskTitle"
-        outlined
-        label="Enter task"
-        append-icon="mdi-plus"
-        class="pa-3"
-        hide-details
-        clearable
-        @click:append="addTask"
-      ></v-text-field> -->

@@ -34,12 +34,14 @@
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
       <div class="input-box">
         <v-text-field
+          v-model="newTaskTitle"
           outlined
           label="Enter task"
           append-icon="mdi-plus"
-          class="ma-3 text-box"
+          class="pa-3"
           hide-details
           clearable
+          @click:append="addTask"
         ></v-text-field>
       </div>
       <v-spacer></v-spacer>
@@ -57,13 +59,33 @@
 
 <script lang="ts">
 import { Vue, Component } from "vue-property-decorator";
+import { namespace } from "vuex-class";
 import { navigationoptions } from "@/constants/uiOptions";
+import { TodoActions } from "./utils/types";
 
+const todo = namespace("Todo");
 @Component
 export default class Home extends Vue {
   drawer = null;
   items = navigationoptions;
   right = null;
+  newTaskTitle = "";
+
+  @todo.Action(TodoActions.LOAD_TODOD_DATA)
+  public loadTodoData!: () => void;
+
+  @todo.Action(TodoActions.ADD_TASK)
+  public addNewTask!: (newTask: string) => void;
+
+  created(): void {
+    this.loadTodoData();
+  }
+
+  addTask(): void {
+    if (this.newTaskTitle) {
+      this.addNewTask(this.newTaskTitle);
+    }
+  }
 }
 </script>
 

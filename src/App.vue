@@ -94,6 +94,21 @@
       <v-main>
         <router-view></router-view>
       </v-main>
+
+      <div class="alert-box">
+        <v-alert
+          v-if="!user && newTaskTitle"
+          text
+          prominent
+          type="error"
+          icon="mdi-alert-octagon-outline"
+          transition="slide-x-reverse-transition"
+          v-model="alert"
+          dismissible
+        >
+          Please login to save your task list.
+        </v-alert>
+      </div>
     </v-app>
   </div>
 </template>
@@ -110,6 +125,7 @@ const user = namespace("User");
 
 @Component
 export default class Home extends Vue {
+  alert = true;
   drawer = null;
   items = navigationoptions;
   right = null;
@@ -152,6 +168,7 @@ export default class Home extends Vue {
     if (this.newTaskTitle) {
       this.addNewTask(this.newTaskTitle);
     }
+    this.newTaskTitle = "";
   }
 
   async login(): Promise<void> {
@@ -182,5 +199,10 @@ export default class Home extends Vue {
   .text-box {
     background: rgba(54, 59, 73, 0.5);
   }
+}
+.alert-box {
+  position: fixed;
+  bottom: 0rem;
+  right: 8px;
 }
 </style>

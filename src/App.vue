@@ -6,13 +6,16 @@
           <v-list-item-content>
             <div class="d-flex">
               <v-avatar>
-                <img :src="profileUrl" alt="profile-pic" />
+                <img v-if="user" :src="profileUrl" alt="profile-pic" />
+                <img v-else src="@/assets/profile-pic.png" alt="profile-pic" />
               </v-avatar>
               <v-list-item-title class="title pl-2">
-                {{ displayName }}
+                {{ displayName || "Todo tasks" }}
               </v-list-item-title>
             </div>
-            <v-list-item-subtitle> {{ email }} </v-list-item-subtitle>
+            <v-list-item-subtitle>
+              {{ email || "@make in india" }}
+            </v-list-item-subtitle>
           </v-list-item-content>
         </v-list-item>
 

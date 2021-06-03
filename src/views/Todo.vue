@@ -1,23 +1,34 @@
 <template>
   <div class="home">
-    <div class="page-header pa-3">
-      <h2>Tasks</h2>
-      <div class="header-options">
-        <template v-for="(option, i) in headerOptions">
-          <v-tooltip bottom :key="i" v-if="showOption(i)">
-            <template v-slot:activator="{ on }">
-              <v-btn
-                icon
-                v-on="on"
-                @click="handleFunctionCall(option.methodName)"
-              >
-                <v-icon :color="option.color">{{ option.icon }}</v-icon>
-              </v-btn>
-            </template>
-            <span>{{ option.title }}</span>
-          </v-tooltip>
-        </template>
+    <div class="page-header">
+      <div class="page-header-header pa-3">
+        <div class="d-flex">
+          <h2>Tasks</h2>
+        </div>
+        <div class="header-options">
+          <template v-for="(option, i) in headerOptions">
+            <v-tooltip bottom :key="i" v-if="showOption(i)">
+              <template v-slot:activator="{ on }">
+                <v-btn
+                  icon
+                  v-on="on"
+                  @click="handleFunctionCall(option.methodName)"
+                >
+                  <v-icon :color="option.color">{{ option.icon }}</v-icon>
+                </v-btn>
+              </template>
+              <span>{{ option.title }}</span>
+            </v-tooltip>
+          </template>
+        </div>
       </div>
+      <v-text-field
+        v-if="showSearchBox"
+        v-model="searchString"
+        class="pa-3"
+        label="Enter task title"
+        clearable
+      ></v-text-field>
     </div>
     <draggable v-model="tasks" :options="{ disabled: !rearrange }">
       <v-card
@@ -26,41 +37,54 @@
         :key="task.id"
         class="mx-3 mb-3"
       >
-        <div
-          @click="doneTask(task.id)"
-          :class="{ 'teal lighten-5': task.done }"
-          class="list-items px-3"
-        >
-          <v-checkbox :input-value="task.done" color="primary"></v-checkbox>
-          <div :class="{ 'text-decoration-line-through': task.done }">
-            {{ task.title }}
-          </div>
-          <div class="menu">
-            <v-menu bottom left>
-              <template v-slot:activator="{ on, attrs }">
-                <v-btn dark icon v-bind="attrs" v-on="on">
-                  <v-icon color="primary">mdi-dots-vertical</v-icon>
-                </v-btn>
-              </template>
-              <v-list>
-                <template v-for="(item, i) in items">
-                  <v-list-item
-                    :key="i"
-                    @click.stop="
-                      handleFunctionCall(item.methodName, task.id, task.title)
-                    "
-                    class="d-flex flex-row"
-                  >
-                    <v-list-item-title>{{ item.title }}</v-list-item-title>
-                    <v-icon :color="item.color" class="pl-5">{{
-                      item.icon
-                    }}</v-icon>
-                  </v-list-item>
+        <template v-if="filterTitle(task.title)">
+          <div
+            @click="doneTask(task.id)"
+            :class="{ 'teal lighten-5': task.done }"
+            class="list-items px-3"
+          >
+            <v-checkbox :input-value="task.done" color="primary"></v-checkbox>
+            <div :class="{ 'text-decoration-line-through': task.done }">
+              {{ task.title }}
+            </div>
+
+            <div class="menu">
+              <v-menu bottom left>
+                <template v-slot:activator="{ on, attrs }">
+                  <div class="d-flex">
+                    <v-chip
+                      v-if="task.dueDate"
+                      class="ma-2"
+                      :color="displayDateColor(task.dueDate)"
+                      outlined
+                    >
+                      {{ task.dueDate | filterDate }}
+                    </v-chip>
+                    <v-btn dark icon v-bind="attrs" v-on="on">
+                      <v-icon color="primary">mdi-dots-vertical</v-icon>
+                    </v-btn>
+                  </div>
                 </template>
-              </v-list>
-            </v-menu>
+                <v-list>
+                  <template v-for="(item, i) in items">
+                    <v-list-item
+                      :key="i"
+                      @click.stop="
+                        handleFunctionCall(item.methodName, task.id, task.title)
+                      "
+                      class="d-flex flex-row"
+                    >
+                      <v-list-item-title>{{ item.title }}</v-list-item-title>
+                      <v-icon :color="item.color" class="pl-5">{{
+                        item.icon
+                      }}</v-icon>
+                    </v-list-item>
+                  </template>
+                </v-list>
+              </v-menu>
+            </div>
           </div>
-        </div>
+        </template>
       </v-card>
     </draggable>
     <v-dialog v-model="dialog" max-width="490">
@@ -82,6 +106,16 @@
           <v-btn color="green darken-1" text @click="editTodo"> Save </v-btn>
         </v-card-actions>
       </v-card>
+    </v-dialog>
+    <v-dialog v-model="datePickerDialog" max-width="300">
+      <v-date-picker v-model="dueDate" :min="minDate"></v-date-picker>
+      <v-card-actions class="white">
+        <v-spacer></v-spacer>
+        <v-btn color="green darken-1" text @click="datePickerDialog = false">
+          Cancel
+        </v-btn>
+        <v-btn color="green darken-1" text @click="setDueDate"> Save </v-btn>
+      </v-card-actions>
     </v-dialog>
   </div>
 </template>
@@ -106,7 +140,14 @@ export default class Home extends Vue {
   items = menuOptions;
   headerOptions = headerOptions;
   dialog = false;
+  datePickerDialog = false;
+  showSearchBox = false;
+  searchString = "";
   tasks: any[] = [];
+  overlay = false;
+  zIndex = 1;
+  dueDate = new Date().toISOString().substr(0, 10);
+  minDate = new Date().toISOString().substr(0, 10);
 
   @todo.Getter("loadTodoData")
   loadTodoData!: any[];
@@ -129,13 +170,16 @@ export default class Home extends Vue {
   @todo.Action(TodoActions.REMOVE_ALL_TASKS)
   public removeAllTask!: () => void;
 
+  @todo.Action(TodoActions.UPDATE_DUE_DATE)
+  public updateDueDate!: (duteDateData: { date: any; id: number }) => void;
+
   @Watch("loadTodoData")
   setTaskList(): void {
     this.tasks = this.loadTodoData;
   }
 
   showOption(i: number): boolean {
-    if ((i === 0 || i == 1) && !this.rearrange) {
+    if ((i === 0 || i == 1 || i == 2) && !this.rearrange) {
       return true;
     } else if (i !== 0 && this.rearrange) {
       return true;
@@ -169,6 +213,33 @@ export default class Home extends Vue {
     this.removeAllTask();
   }
 
+  filterTitle(title: string): boolean {
+    if (title.indexOf(this.searchString) !== -1) {
+      return true;
+    }
+    return false;
+  }
+
+  async setDueDate(): Promise<void> {
+    this.datePickerDialog = false;
+    await this.updateDueDate({ date: this.dueDate, id: this.id });
+    this.id = -1;
+  }
+
+  displayDateColor(dueDate: string) {
+    let nextDate = new Date();
+    nextDate.setDate(nextDate.getDate() + 1);
+    let nextDay = new Date(dueDate);
+    if (dueDate === this.minDate) {
+      return "red";
+    } else if (
+      nextDay.toString().slice(4, 15) === nextDate.toString().slice(4, 15)
+    ) {
+      return "orange";
+    }
+    return "green";
+  }
+
   handleFunctionCall(functionName: string, id = -1, task = ""): void {
     switch (functionName) {
       case "deleteTodo":
@@ -188,11 +259,19 @@ export default class Home extends Vue {
       case "deleteAll":
         this.deleteAllTask();
         break;
+      case "showSearchBox":
+        this.showSearchBox = !this.showSearchBox;
+        break;
+      case "datePIcker":
+        this.id = id;
+        this.datePickerDialog = !this.datePickerDialog;
+        break;
     }
   }
 
   created(): void {
     this.tasks = this.loadTodoData;
+    console.log();
   }
 }
 </script>
@@ -203,10 +282,11 @@ export default class Home extends Vue {
   top: 8rem;
   z-index: 1;
   background: white;
-  display: flex;
-
-  .header-options {
-    margin-left: auto;
+  &-header {
+    display: flex;
+    .header-options {
+      margin-left: auto;
+    }
   }
 }
 .list-items {

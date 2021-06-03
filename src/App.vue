@@ -66,10 +66,6 @@
           ></v-text-field>
         </div>
         <v-spacer></v-spacer>
-
-        <v-btn icon>
-          <v-icon>mdi-magnify</v-icon>
-        </v-btn>
         <div class="menu">
           <v-menu bottom>
             <template v-slot:activator="{ on, attrs }">

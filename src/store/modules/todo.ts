@@ -33,7 +33,7 @@ class Todo extends VuexModule {
     const newTask = {
       id: Date.now(),
       title: newTaskTitle.newTask,
-      dueTime: "",
+      dueDate: "",
       done: false,
     };
     this.todoData.push(newTask);
@@ -145,6 +145,26 @@ class Todo extends VuexModule {
   @Action
   [TodoActions.SET_LOCAL_STORAGE](uid: string | null): void {
     this.context.commit(TodoMutations.SET_LOCAL_STORAGE);
+  }
+
+  @Mutation
+  public [TodoMutations.UPDATE_DUE_DATE](duteDateData: {
+    date: any;
+    id: number;
+  }): void {
+    this.todoData.forEach((task) => {
+      if (task.id === duteDateData.id) {
+        task.dueDate = duteDateData.date;
+      }
+    });
+    if (this.uid) {
+      updateTodoList(this.todoData, this.uid);
+    }
+  }
+
+  @Action
+  [TodoActions.UPDATE_DUE_DATE](duteDateData: { date: any; id: number }): void {
+    this.context.commit(TodoMutations.UPDATE_DUE_DATE, duteDateData);
   }
 
   get loadTodoData() {

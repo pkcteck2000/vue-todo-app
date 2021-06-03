@@ -19,7 +19,7 @@ const menuOptions = [
   {
     title: "Due date",
     icon: "mdi-calendar",
-    methodName: "",
+    methodName: "datePIcker",
     color: "#eb34b1",
   },
 ];
@@ -29,6 +29,12 @@ const headerOptions = [
     title: "Rearrange tasks",
     icon: "mdi-order-alphabetical-descending",
     methodName: "toggleRearrange",
+    color: "primary",
+  },
+  {
+    title: "Search Task",
+    icon: "mdi-magnify",
+    methodName: "showSearchBox",
     color: "primary",
   },
   {

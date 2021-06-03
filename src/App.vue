@@ -96,15 +96,15 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Watch } from "vue-property-decorator";
+import { Vue, Component } from "vue-property-decorator";
 import { namespace } from "vuex-class";
 import { navigationoptions } from "@/constants/uiOptions";
 import { TodoActions, UserActions } from "./utils/types";
 import firebase from "firebase";
 import router from "@/router";
-
 const todo = namespace("Todo");
 const user = namespace("User");
+
 @Component
 export default class Home extends Vue {
   drawer = null;
@@ -131,6 +131,9 @@ export default class Home extends Vue {
     isLoggedIn: boolean;
   }) => void;
 
+  @todo.Action(TodoActions.SET_LOCAL_STOREAGE)
+  public setLocalstorage!: () => void;
+
   async created(): Promise<void> {
     if (this.user) {
       this.displayName = this.user.displayName;
@@ -148,7 +151,8 @@ export default class Home extends Vue {
     }
   }
 
-  login(): void {
+  async login(): Promise<void> {
+    await this.setLocalstorage();
     const provider = new firebase.auth.GoogleAuthProvider();
     firebase.auth().signInWithRedirect(provider).catch(console.log);
   }

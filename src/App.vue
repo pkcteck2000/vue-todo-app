@@ -52,7 +52,10 @@
           ></v-img>
         </template>
 
-        <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
+        <v-app-bar-nav-icon
+          class="d-lg-none"
+          @click="drawer = !drawer"
+        ></v-app-bar-nav-icon>
         <div class="input-box">
           <v-text-field
             v-model="newTaskTitle"

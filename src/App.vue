@@ -96,14 +96,15 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from "vue-property-decorator";
+import { Vue, Component, Watch } from "vue-property-decorator";
 import { namespace } from "vuex-class";
 import { navigationoptions } from "@/constants/uiOptions";
-import { TodoActions } from "./utils/types";
+import { TodoActions, UserActions } from "./utils/types";
 import firebase from "firebase";
 import router from "@/router";
 
 const todo = namespace("Todo");
+const user = namespace("User");
 @Component
 export default class Home extends Vue {
   drawer = null;
@@ -121,11 +122,24 @@ export default class Home extends Vue {
   @todo.Action(TodoActions.ADD_TASK)
   public addNewTask!: (newTask: string) => void;
 
-  created(): void {
-    this.loadTodoData();
-    this.displayName = this.user?.displayName;
-    this.profileUrl = this.user?.photoURL;
-    this.email = this.user?.email;
+  @todo.Action(TodoActions.SET_USER_ID)
+  public setUserId!: (userId: string | null) => void;
+
+  @user.Action(UserActions.SET_USER_INFO)
+  public setUserInfo!: (loginDetails: {
+    userInfo: any;
+    isLoggedIn: boolean;
+  }) => void;
+
+  async created(): Promise<void> {
+    if (this.user) {
+      this.displayName = this.user.displayName;
+      this.profileUrl = this.user.photoURL;
+      this.email = this.user.email;
+      await this.setUserInfo({ userInfo: this.user, isLoggedIn: true });
+      await this.setUserId(this.user.uid);
+      this.loadTodoData();
+    }
   }
 
   addTask(): void {
@@ -134,7 +148,7 @@ export default class Home extends Vue {
     }
   }
 
-  login() {
+  login(): void {
     const provider = new firebase.auth.GoogleAuthProvider();
     firebase.auth().signInWithRedirect(provider).catch(console.log);
   }
@@ -145,6 +159,8 @@ export default class Home extends Vue {
       router.push({ name: "Todo" });
     }
     this.user = null;
+    this.setUserInfo({ userInfo: null, isLoggedIn: false });
+    this.setUserId(null);
   }
 }
 </script>

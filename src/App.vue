@@ -150,7 +150,7 @@ export default class Home extends Vue {
     isLoggedIn: boolean;
   }) => void;
 
-  @todo.Action(TodoActions.SET_LOCAL_STOREAGE)
+  @todo.Action(TodoActions.SET_LOCAL_STORAGE)
   public setLocalstorage!: () => void;
 
   async created(): Promise<void> {

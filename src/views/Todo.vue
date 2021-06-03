@@ -126,13 +126,16 @@ export default class Home extends Vue {
   @todo.Action(TodoActions.UPDATE_PROGRESS)
   public updateTask!: (id: number) => void;
 
+  @todo.Action(TodoActions.REMOVE_ALL_TASKS)
+  public removeAllTask!: () => void;
+
   @Watch("loadTodoData")
   setTaskList(): void {
     this.tasks = this.loadTodoData;
   }
 
   showOption(i: number): boolean {
-    if (i === 0 && !this.rearrange) {
+    if ((i === 0 || i == 1) && !this.rearrange) {
       return true;
     } else if (i !== 0 && this.rearrange) {
       return true;
@@ -162,6 +165,10 @@ export default class Home extends Vue {
     this.rearrangeTask(this.tasks);
   }
 
+  deleteAllTask(): void {
+    this.removeAllTask();
+  }
+
   handleFunctionCall(functionName: string, id = -1, task = ""): void {
     switch (functionName) {
       case "deleteTodo":
@@ -177,6 +184,9 @@ export default class Home extends Vue {
         break;
       case "updateOrder":
         this.updateOrder();
+        break;
+      case "deleteAll":
+        this.deleteAllTask();
         break;
     }
   }

@@ -32,6 +32,12 @@ const headerOptions = [
     color: "primary",
   },
   {
+    title: "Delete All",
+    icon: "mdi-delete",
+    methodName: "deleteAll",
+    color: "red",
+  },
+  {
     title: "Update",
     icon: "mdi-check",
     methodName: "updateOrder",

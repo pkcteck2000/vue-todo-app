@@ -119,19 +119,32 @@ class Todo extends VuexModule {
     }
   }
 
+  @Mutation
+  public [TodoMutations.REMOVE_ALL_TASKS](): void {
+    this.todoData = [];
+    if (this.uid) {
+      updateTodoList(this.todoData, this.uid);
+    }
+  }
+
+  @Action
+  [TodoActions.REMOVE_ALL_TASKS](uid: string | null): void {
+    this.context.commit(TodoMutations.REMOVE_ALL_TASKS);
+  }
+
   @Action
   [TodoActions.SET_USER_ID](uid: string | null): void {
     this.context.commit(TodoMutations.SET_USER_ID, uid);
   }
 
   @Mutation
-  public [TodoMutations.SET_LOCAL_STOREAGE](): void {
+  public [TodoMutations.SET_LOCAL_STORAGE](): void {
     localStorage.setItem("todoList", JSON.stringify(this.todoData));
   }
 
   @Action
-  [TodoActions.SET_LOCAL_STOREAGE](uid: string | null): void {
-    this.context.commit(TodoMutations.SET_LOCAL_STOREAGE);
+  [TodoActions.SET_LOCAL_STORAGE](uid: string | null): void {
+    this.context.commit(TodoMutations.SET_LOCAL_STORAGE);
   }
 
   get loadTodoData() {

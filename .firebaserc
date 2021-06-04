@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "todo-app-4396b"
+  },
+  "targets": {
+    "vue-practice-68b47": {
+      "hosting": {
+        "todo": [
+          "todo-app-4396b"
+        ]
+      }
+    }
+  }
+}

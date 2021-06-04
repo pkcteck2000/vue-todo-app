@@ -6,14 +6,14 @@
           <v-list-item-content>
             <div class="d-flex">
               <v-avatar>
-                <img v-if="user" :src="profileUrl" alt="profile-pic" />
+                <img v-if="picUrl" :src="picUrl" alt="profile-pic" />
                 <img v-else src="@/assets/profile-pic.png" alt="profile-pic" />
               </v-avatar>
               <v-list-item-title class="title pl-2">
                 {{ displayName || "Todo tasks" }}
               </v-list-item-title>
             </div>
-            <v-list-item-subtitle>
+            <v-list-item-subtitle class="pt-5">
               {{ email || "@make in india" }}
             </v-list-item-subtitle>
           </v-list-item-content>
@@ -105,7 +105,7 @@
           v-model="alert"
           dismissible
         >
-          Please login to save your task list.
+          You are editing in offline mode. Please login to save your task list.
         </v-alert>
       </div>
     </v-app>
@@ -157,7 +157,7 @@ export default class Home extends Vue {
   newTaskTitle = "";
   user = firebase.auth().currentUser;
   displayName: string | undefined | null = "";
-  profileUrl: string | undefined | null = "";
+  picUrl: string | undefined | null = "";
   email: string | undefined | null = "";
   dialog = false;
 
@@ -182,7 +182,7 @@ export default class Home extends Vue {
   async created(): Promise<void> {
     if (this.user) {
       this.displayName = this.user.displayName;
-      this.profileUrl = this.user.photoURL;
+      this.picUrl = this.user.photoURL;
       this.email = this.user.email;
       await this.setUserInfo({ userInfo: this.user, isLoggedIn: true });
       await this.setUserId(this.user.uid);

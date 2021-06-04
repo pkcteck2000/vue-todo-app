@@ -172,8 +172,11 @@ export default class Home extends Vue {
 
   async login(): Promise<void> {
     await this.setLocalstorage();
+    // const provider = new firebase.auth.FacebookAuthProvider();
+    // const provider = new firebase.auth.GithubAuthProvider();
     const provider = new firebase.auth.GoogleAuthProvider();
-    firebase.auth().signInWithRedirect(provider).catch(console.log);
+    firebase.auth().signInWithPopup(provider);
+    // firebase.auth().signInWithRedirect(provider);
   }
 
   logout(): void {

@@ -81,7 +81,7 @@
                 <v-list-item-title>Logout</v-list-item-title>
                 <v-icon color="primary" class="pl-5">mdi-logout</v-icon>
               </v-list-item>
-              <v-list-item @click.stop="login()" v-else>
+              <v-list-item @click.stop="dialog = true" v-else>
                 <v-list-item-title>Login</v-list-item-title>
                 <v-icon color="primary" class="pl-5">mdi-login</v-icon>
               </v-list-item>
@@ -109,6 +109,26 @@
         </v-alert>
       </div>
     </v-app>
+
+    <v-row justify="center">
+      <v-dialog
+        v-model="dialog"
+        fullscreen
+        hide-overlay
+        transition="dialog-bottom-transition"
+      >
+        <v-card>
+          <v-toolbar dark color="primary">
+            <v-btn icon dark @click="dialog = false">
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
+            <v-toolbar-title>Login</v-toolbar-title>
+            <v-spacer></v-spacer>
+          </v-toolbar>
+          <login />
+        </v-card>
+      </v-dialog>
+    </v-row>
   </div>
 </template>
 
@@ -119,10 +139,16 @@ import { navigationoptions } from "@/constants/uiOptions";
 import { TodoActions, UserActions } from "./utils/types";
 import firebase from "firebase";
 import router from "@/router";
-const todo = namespace("Todo");
-const user = namespace("User");
+import Login from "@/components/Login.vue";
 
-@Component
+const todo = namespace("Todo");
+const userStore = namespace("User");
+
+@Component({
+  components: {
+    Login,
+  },
+})
 export default class Home extends Vue {
   alert = true;
   drawer = null;
@@ -133,6 +159,7 @@ export default class Home extends Vue {
   displayName: string | undefined | null = "";
   profileUrl: string | undefined | null = "";
   email: string | undefined | null = "";
+  dialog = false;
 
   @todo.Action(TodoActions.LOAD_TODOD_DATA)
   public loadTodoData!: () => void;
@@ -143,7 +170,7 @@ export default class Home extends Vue {
   @todo.Action(TodoActions.SET_USER_ID)
   public setUserId!: (userId: string | null) => void;
 
-  @user.Action(UserActions.SET_USER_INFO)
+  @userStore.Action(UserActions.SET_USER_INFO)
   public setUserInfo!: (loginDetails: {
     userInfo: any;
     isLoggedIn: boolean;
@@ -168,15 +195,6 @@ export default class Home extends Vue {
       this.addNewTask(this.newTaskTitle);
     }
     this.newTaskTitle = "";
-  }
-
-  async login(): Promise<void> {
-    await this.setLocalstorage();
-    // const provider = new firebase.auth.FacebookAuthProvider();
-    // const provider = new firebase.auth.GithubAuthProvider();
-    const provider = new firebase.auth.GoogleAuthProvider();
-    firebase.auth().signInWithPopup(provider);
-    // firebase.auth().signInWithRedirect(provider);
   }
 
   logout(): void {

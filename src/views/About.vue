@@ -18,28 +18,3 @@
     </p>
   </div>
 </template>
-
-<script>
-export default {
-  data() {
-    return {
-      search: "",
-      headers: [
-        {
-          text: "Dessert (100g serving)",
-          // filterable: true,
-          value: "name",
-        },
-      ],
-      desserts: [
-        {
-          name: "Frozen Yogurt",
-        },
-        {
-          name: "Ice cream sandwich",
-        },
-      ],
-    };
-  },
-};
-</script>

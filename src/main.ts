@@ -6,6 +6,7 @@ import store from "./store";
 import vuetify from "./plugins/vuetify";
 import firebase from "firebase";
 import { filterDate } from "@/utils/filter";
+import "@lottiefiles/lottie-player";
 
 Vue.filter("filterDate", filterDate);
 Vue.config.productionTip = false;

@@ -30,7 +30,8 @@
         clearable
       ></v-text-field>
     </div>
-    <draggable v-model="tasks" :options="{ disabled: !rearrange }">
+    <empty v-if="!(tasks.length > 0)" />
+    <draggable v-else v-model="tasks" :options="{ disabled: !rearrange }">
       <v-card
         v-for="task in tasks"
         :elevation="4"
@@ -126,11 +127,13 @@ import { namespace } from "vuex-class";
 import draggable from "vuedraggable";
 import { menuOptions, headerOptions } from "@/constants/uiOptions";
 import { TodoActions } from "@/utils/types";
+import Empty from "@/components/Empty.vue";
 
 const todo = namespace("Todo");
 @Component({
   components: {
     draggable,
+    Empty,
   },
 })
 export default class Home extends Vue {

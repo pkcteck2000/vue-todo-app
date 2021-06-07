@@ -66,6 +66,7 @@
             hide-details
             clearable
             @click:append="addTask"
+            @keydown="showWarning = true"
           ></v-text-field>
         </div>
         <v-spacer></v-spacer>
@@ -96,9 +97,8 @@
 
       <div class="alert-box">
         <v-alert
-          v-if="!user && newTaskTitle"
+          v-if="!user && showWarning"
           text
-          prominent
           type="error"
           icon="mdi-alert-octagon-outline"
           transition="slide-x-reverse-transition"
@@ -155,6 +155,7 @@ export default class Home extends Vue {
   items = navigationoptions;
   right = null;
   newTaskTitle = "";
+  showWarning = false;
   user = firebase.auth().currentUser;
   displayName: string | undefined | null = "";
   picUrl: string | undefined | null = "";

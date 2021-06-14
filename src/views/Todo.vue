@@ -33,14 +33,12 @@
     <empty v-if="!(tasks.length > 0)" />
     <draggable v-else v-model="tasks" :options="{ disabled: !rearrange }">
       <v-card
-        v-for="task in tasks"
+        v-for="task in filterTitle()"
         :elevation="4"
         :key="task.id"
         class="mx-3 mb-3"
       >
-        <template v-if="filterTitle(task.title)">
-          <TodoList :task="task" />
-        </template>
+        <TodoList :task="task" />
       </v-card>
     </draggable>
   </div>
@@ -102,11 +100,12 @@ export default class Home extends Vue {
     this.removeAllTask();
   }
 
-  filterTitle(title: string): boolean {
-    if (title.toLowerCase().indexOf(this.searchString.toLowerCase()) !== -1) {
-      return true;
-    }
-    return false;
+  filterTitle(): any[] {
+    return this.tasks.filter((item) => {
+      return (
+        item.title.toLowerCase().indexOf(this.searchString.toLowerCase()) !== -1
+      );
+    });
   }
 
   handleFunctionCall(functionName: string, id = -1, task = ""): void {
